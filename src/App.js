@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styled from "styled-components";
 
 import Cell from "./components/Cell";
@@ -15,10 +15,14 @@ const Grid = styled.div`
   );
 `;
 function App() {
-  const [gridHeight, setGridHeight] = useState(100);
-  const [gridWidth, setGridWidth] = useState(100);
+  const [gridHeight, setGridHeight] = useState(50);
+  const [gridWidth, setGridWidth] = useState(50);
   const [cellSize, setCellSize] = useState("10px");
   const [grid, setGrid] = useState(initializeGrid());
+  const [isRunning, setIsRunning] = useState(false);
+  const [generation, setGeneration] = useState(0);
+
+  useEffect(handleInterval);
 
   function initializeGrid() {
     let grid = [];
@@ -98,8 +102,25 @@ function App() {
         return column;
       }, [])
     );
+    setGeneration(generation + 1);
   }
 
+  function handleInterval() {
+    let interval = null;
+    if (isRunning) {
+      interval = setInterval(iterate, 250);
+    }
+    return () => clearInterval(interval);
+  }
+  function toggle() {
+    setIsRunning(!isRunning);
+  }
+
+  function clearGrid() {
+    setIsRunning(false);
+    setGrid(initializeGrid());
+    setGeneration(0);
+  }
   return (
     <div>
       <Grid
@@ -119,7 +140,10 @@ function App() {
           ))
         )}
       </Grid>
-      <button onClick={iterate}>Iterate</button>
+      <p>Generation: {generation}</p>
+      <button onClick={iterate}>Next Generation</button>
+      <button onClick={toggle}>{isRunning ? "Stop" : "Start"}</button>
+      <button onClick={clearGrid}>Clear</button>
     </div>
   );
 }
